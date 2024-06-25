@@ -1,16 +1,19 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 import { PatientModule } from './patient/patient.module';
+import { LoggerMiddleware } from './middlewares/logger/logger.middleware';
+import { PatientController } from './patient/patient.controller';
 
 
 
 
 
 @Module({
-  imports: [TypeOrmModule.forRoot({
+  imports: [
+TypeOrmModule.forRoot({
     type: "mysql",
     host: "127.0.0.1",
     port:3306,
@@ -25,7 +28,12 @@ PatientModule
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+        consumer
+        .apply(LoggerMiddleware)
+        .forRoutes(PatientController);
+  }
 }
 
 
